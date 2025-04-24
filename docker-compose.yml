@@ -1,0 +1,25 @@
+
+services:
+  tournament.api:
+    image: ${DOCKER_REGISTRY-}tournamentapi
+    build:
+      context: .
+      dockerfile: Tournament.Api\Dockerfile
+    depends_on:
+      - rabbitmq
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"    # AMQP port
+      - "15672:15672"  # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: pass
+  tournament.workerservices:
+    image: ${DOCKER_REGISTRY-}tournamentworkerservices
+    build:
+      context: .
+      dockerfile: Tournament.Workerservices/Dockerfile
+    depends_on:
+      - rabbitmq 
