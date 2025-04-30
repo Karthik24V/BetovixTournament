@@ -1,8 +1,12 @@
 ﻿
 using MassTransit;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using System.Text;
 using Tournament.Api.Middlewares;
+using Tournament.Common.Dto_s;
 using Tournament.Domain.DataBase.DBContext;
 using Tournament.Infrastructure.Logging;
 
@@ -14,12 +18,15 @@ namespace Tournament.Api.Extension
         {
             services.AddSerilogLogging(configuration);
             services.AddAutoMapper(typeof(Tournament.Business.Mapper.AutoMapper));
+            services.Configure<ApiKeySettings>(configuration.GetSection("ApiKeySettings"));
 
+            // added the DbContext
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseNpgsql(configuration.GetConnectionString("connectionString"));
             });
 
+            // Add MassTransit and configure RabbitMQ
             services.AddMassTransit(x =>
             {
                 var rabbitMqConfig = configuration.GetSection("RabbitMQ");
@@ -32,6 +39,24 @@ namespace Tournament.Api.Extension
                     });
                 });
             });
+
+            //add authentication services
+            var jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>();
+            services.AddAuthentication("Bearer")
+                .AddJwtBearer("Bearer", options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = jwtSettings.Issuer,
+                        ValidAudience = jwtSettings.Audience,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret))
+                    };
+                })
+                .AddScheme<AuthenticationSchemeOptions, AuthenticationhandlerExtension>("API-KEY", null);
         }
 
         public static void AddMiddlewareServices(this WebApplication app)

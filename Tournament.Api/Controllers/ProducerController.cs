@@ -1,6 +1,8 @@
 ﻿using MassTransit;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Tournament.Common.Constants;
 using Tournament.Common.Dto_s;
 
 namespace Tournament.Api.Controllers
@@ -14,6 +16,7 @@ namespace Tournament.Api.Controllers
             _bus = bus;
         }
 
+        [Authorize(AuthenticationSchemes = AuthenticationSchemeConstants.ApiKey)]
         [HttpPost]
         public ActionResult PostTournament(TournamentRequestDto name)
         {

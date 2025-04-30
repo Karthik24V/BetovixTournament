@@ -1,4 +1,5 @@
 
+using Microsoft.OpenApi.Models;
 using Tournament.Api.Extension;
 
 namespace Tournament.Api
@@ -15,7 +16,36 @@ namespace Tournament.Api
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new() { Title = "Tournament API", Version = "v1" });
+                // JWT Bearer token setup
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer"
+                });
+                // API Key setup
+                c.AddSecurityDefinition("API-KEY", new OpenApiSecurityScheme
+                {
+                    Description = "API Key needed to access this endpoint.",
+                    Name = "X-API-KEY", 
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "API-KEY"
+                });
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                      {
+                        {new OpenApiSecurityScheme{ Reference = new OpenApiReference 
+                                { Type = ReferenceType.SecurityScheme, Id = "Bearer" }},new string[] {}},
+                        {new OpenApiSecurityScheme { Reference = new OpenApiReference
+                                { Type = ReferenceType.SecurityScheme, Id = "API-KEY" }}, new string[] {}}
+                       });
+                 });
             var app = builder.Build();
 
             //added the custom middleware
@@ -24,7 +54,10 @@ namespace Tournament.Api
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Tournament API v1");
+                });
             }
 
             app.UseHttpsRedirection();
