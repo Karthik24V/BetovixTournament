@@ -29,9 +29,9 @@ public class ApplicationDbContext : DbContext
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.IsDeleted).HasDefaultValue(false);
 
-            entity.HasMany(e => e.ParticipationRules)
+            entity.HasOne(e => e.ParticipationRules)
                   .WithOne(r => r.Tournament)
-                  .HasForeignKey(r => r.TournamentId)
+                  .HasForeignKey<TournamentParticipationRule>(r => r.TournamentId)
                   .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasMany(e => e.Participants)
@@ -61,11 +61,10 @@ public class ApplicationDbContext : DbContext
         });
 
         // Participation Rule
-        modelBuilder.Entity<TournamentParticipationRule>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.GameCode).HasMaxLength(100);
-        });
+        modelBuilder.Entity<TournamentParticipationRule>()
+                    .HasOne(r => r.Tournament)
+                    .WithOne(t => t.ParticipationRules)
+                    .HasForeignKey<TournamentParticipationRule>(r => r.TournamentId);
 
         // Participant
         modelBuilder.Entity<TournamentParticipant>(entity =>
@@ -74,6 +73,7 @@ public class ApplicationDbContext : DbContext
             entity.HasOne(p => p.User).WithMany(u => u.TournamentParticipations).HasForeignKey(p => p.UserId);
         });
 
+        // User
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasKey(e => e.Id);
@@ -81,13 +81,17 @@ public class ApplicationDbContext : DbContext
             entity.Property(e => e.Email).HasMaxLength(300);
         });
 
-
         // TournamentEvent
         modelBuilder.Entity<TournamentEvent>(entity =>
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.MetaData).IsRequired();
             entity.Property(e => e.IsQualifying).HasDefaultValue(false);
+
+            entity.HasMany(e => e.Points)
+                  .WithOne(p => p.Event)
+                  .HasForeignKey(p => p.EventId)
+                  .OnDelete(DeleteBehavior.Cascade);
         });
 
         // TournamentPoint
@@ -109,9 +113,8 @@ public class ApplicationDbContext : DbContext
                   .OnDelete(DeleteBehavior.Cascade);
 
             entity.Property(e => e.Rank)
-            .HasConversion(e => e.ToString(), e => (Rank)Enum.Parse(typeof(Rank), e))
-            .HasColumnType("text");
-
+                  .HasConversion(e => e.ToString(), e => (Rank)Enum.Parse(typeof(Rank), e))
+                  .HasColumnType("text");
         });
 
         // TournamentPrize

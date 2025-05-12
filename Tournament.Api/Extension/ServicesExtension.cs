@@ -1,12 +1,15 @@
-﻿
-using MassTransit;
+﻿using MassTransit;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System.Text;
 using Tournament.Api.Middlewares;
+using Tournament.Business.IServices;
+using Tournament.Business.Services;
 using Tournament.Common.Dto_s;
+using Tournament.Data.IRepository;
+using Tournament.Data.Repository;
 using Tournament.Domain.DataBase.DBContext;
 using Tournament.Infrastructure.Logging;
 
@@ -19,6 +22,8 @@ namespace Tournament.Api.Extension
             services.AddSerilogLogging(configuration);
             services.AddAutoMapper(typeof(Tournament.Business.Mapper.AutoMapper));
             services.Configure<ApiKeySettings>(configuration.GetSection("ApiKeySettings"));
+            services.AddScoped<ITournamentService, TournamentService>();
+            services.AddScoped<ITournamentRepository, TournamentRepository>();
 
             // added the DbContext
             services.AddDbContext<ApplicationDbContext>(options =>

@@ -14,7 +14,7 @@ public class TournamentEntity
     public DateTime CreatedOn { get; set; }
     public DateTime? UpdatedOn { get; set; }
 
-    public ICollection<TournamentParticipationRule> ParticipationRules { get; set; }
+    public TournamentParticipationRule ParticipationRules { get; set; }
     public ICollection<TournamentParticipant> Participants { get; set; }
     public ICollection<TournamentEvent> Events { get; set; }
     public ICollection<LeaderboardEntry> LeaderboardEntries { get; set; }
