@@ -46,7 +46,7 @@ namespace Tournament.Api.Controllers
             return Ok(ApiResponse<TournamentDto>.SuccessResponse(result, "Tournament updated successfully"));
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("DeleteTournament")]
         public async Task<ActionResult<ApiResponse<string>>> DeleteTournament(long id)
         {
             var success = await _tournamentService.DeleteTournamentAsync(id);
@@ -56,7 +56,7 @@ namespace Tournament.Api.Controllers
             return Ok(ApiResponse<string>.SuccessResponse(null, "Tournament deleted successfully"));
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("GetTournamentById")]
         public async Task<ActionResult<ApiResponse<TournamentDto>>> GetTournamentById(long id)
         {
             var result = await _tournamentService.GetTournamentByIdAsync(id);
@@ -65,5 +65,39 @@ namespace Tournament.Api.Controllers
 
             return Ok(ApiResponse<TournamentDto>.SuccessResponse(result));
         }
+
+        /// <summary>
+        /// join the participant to tournament
+        /// </summary>
+        /// <param name="dto">participant data</param>
+        /// <returns>Created participant data</returns>
+        [HttpPost("JoinTournament")]
+        public async Task<ActionResult<ApiResponse<ParticipationDto>>> JoinTournament([FromBody]ParticipationDto dto)
+        {
+            var success = await _tournamentService.JoinTournamentAsync(dto);
+
+            if (!success)
+                return NotFound(ApiResponse<ParticipationDto>.FailureResponse("InValid participant"));
+
+            return Ok(ApiResponse<ParticipationDto>.SuccessResponse(dto, "Participant joined successfully"));
+        }
+
+        /// <summary>
+        /// Check the participant status
+        /// </summary>
+        /// <param name="ParticipantAccId"></param>
+        /// <param name="TournamentId"></param>
+        /// <returns>ParticipationStatusDto</returns>
+        [HttpGet("GetParticipantStatus")]
+        public async Task<ActionResult<ApiResponse<ParticipationStatusDto>>> ParticipationStatus(int ParticipantAccId , int TournamentId)
+        {
+            var result = await _tournamentService.ParticipantStatustAsync(ParticipantAccId, TournamentId);
+
+            if (result == null)
+                return NotFound(ApiResponse<ParticipationDto>.FailureResponse("Participant not found"));
+
+            return Ok(ApiResponse<ParticipationStatusDto>.SuccessResponse(result, "Eligible participant"));
+        }
+
     }
 }

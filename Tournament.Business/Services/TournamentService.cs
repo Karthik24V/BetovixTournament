@@ -79,5 +79,75 @@ namespace Tournament.Business.Services
             return true;
         }
 
+        public async Task<bool> JoinTournamentAsync(ParticipationDto dto)
+        {
+            try
+            {
+                var tournament = await _tournamentRepository.GetByIdAsync(dto.TournamentId);
+                var participant = new TournamentParticipant()
+                {
+                    TournamentId = dto.TournamentId,
+                    AccountId = dto.AccountId,
+                    UserId = dto.UserId
+                };
+
+                var isValidEntry = DateTime.UtcNow >= tournament.CreatedOn && DateTime.UtcNow <= tournament.EndDate ? true : false;
+                var IsExistingUser = tournament.Participants.FirstOrDefault(_ => _.AccountId == participant.AccountId && _.TournamentId == participant.TournamentId) == null;
+
+                if (isValidEntry && IsExistingUser) {
+                    participant.Tournament = tournament;
+                    var user = await _tournamentRepository.GetUserByIdAsync(participant.UserId); // For now User part in pending.
+                    if (user != null)
+                    {
+                        participant.User = user;
+                    }
+                    participant.User = new User()
+                    {
+                        RealName = "",
+                        Country = "",
+                        UniqueName = "",
+                        Email = "",
+                        IsActive= true,
+                        Points=0,
+                        RegisteredOn = DateTime.UtcNow,
+                    };
+                    participant.JoinedOn = DateTime.UtcNow;
+                    participant.EligibilityPassed = true;
+                    await _tournamentRepository.AddParticipant(participant);
+                    tournament.Participants.Add(await _tournamentRepository.GetParticipantByIdAsync(participant.AccountId, participant.TournamentId));
+                    await _tournamentRepository.UpdateAsync(tournament);
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception ex) { 
+              return false;
+            }
+
+        }
+
+        public async Task<ParticipationStatusDto> ParticipantStatustAsync(long id, long TournamentId)
+        {
+            try
+            {
+                var participant = await _tournamentRepository.GetParticipantByIdAsync(id,TournamentId);
+
+                if (participant != null)
+                {
+                    return new ParticipationStatusDto
+                    {
+                        Joined = true,
+                        JoinedOn = participant.JoinedOn,
+                        Eligible = participant.EligibilityPassed,
+                    };
+                }
+
+                return null;
+            }
+            catch (Exception ex) { 
+                return null;
+            }
+
+        }
     }
 }

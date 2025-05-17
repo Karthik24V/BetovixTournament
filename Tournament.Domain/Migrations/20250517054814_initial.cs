@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Tournament.Domain.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -18,13 +18,13 @@ namespace Tournament.Domain.Migrations
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    Description = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: false),
                     GameType = table.Column<int>(type: "integer", nullable: false),
                     StartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     EndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedBy = table.Column<string>(type: "text", nullable: false),
                     CreatedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
@@ -41,8 +41,8 @@ namespace Tournament.Domain.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     RealName = table.Column<string>(type: "text", nullable: false),
-                    UniqueName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    Email = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false),
+                    UniqueName = table.Column<string>(type: "text", nullable: false),
+                    Email = table.Column<string>(type: "text", nullable: false),
                     Country = table.Column<string>(type: "text", nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
                     Points = table.Column<long>(type: "bigint", nullable: false),
@@ -59,18 +59,16 @@ namespace Tournament.Domain.Migrations
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    EventRefId = table.Column<Guid>(type: "uuid", nullable: false),
-                    TournamentId = table.Column<long>(type: "bigint", nullable: false),
                     AccountId = table.Column<long>(type: "bigint", nullable: false),
-                    EntityType = table.Column<int>(type: "integer", nullable: false),
-                    ActionType = table.Column<int>(type: "integer", nullable: false),
-                    StakeAmount = table.Column<decimal>(type: "numeric", nullable: false),
+                    EventRefId = table.Column<Guid>(type: "uuid", nullable: false),
+                    EntityRefId = table.Column<long>(type: "bigint", nullable: false),
+                    Action = table.Column<int>(type: "integer", nullable: false),
+                    SourceValue = table.Column<decimal>(type: "numeric", nullable: false),
                     WinAmount = table.Column<decimal>(type: "numeric", nullable: true),
-                    Odd = table.Column<decimal>(type: "numeric", nullable: true),
-                    MetaData = table.Column<string>(type: "text", nullable: false),
-                    IsQualifying = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
                     DateAdded = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    ProcessedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    ProcessedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    MetaData = table.Column<string>(type: "text", nullable: false),
+                    TournamentId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -94,7 +92,7 @@ namespace Tournament.Domain.Migrations
                     MinOdd = table.Column<decimal>(type: "numeric", nullable: true),
                     MinSpinsCount = table.Column<int>(type: "integer", nullable: true),
                     MinEvents = table.Column<int>(type: "integer", nullable: true),
-                    GameCode = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false)
+                    GameCode = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -167,18 +165,18 @@ namespace Tournament.Domain.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     TournamentId = table.Column<long>(type: "bigint", nullable: false),
                     AccountId = table.Column<long>(type: "bigint", nullable: false),
-                    EventId = table.Column<long>(type: "bigint", nullable: false),
+                    EventId = table.Column<Guid>(type: "uuid", nullable: false),
                     Points = table.Column<decimal>(type: "numeric", nullable: false),
-                    Multiplier = table.Column<decimal>(type: "numeric", nullable: false),
-                    Reason = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    CreatedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    WinAmount = table.Column<decimal>(type: "numeric", nullable: false),
+                    CreatedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    EventId1 = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_TournamentPoints", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_TournamentPoints_TournamentEvents_EventId",
-                        column: x => x.EventId,
+                        name: "FK_TournamentPoints_TournamentEvents_EventId1",
+                        column: x => x.EventId1,
                         principalTable: "TournamentEvents",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -203,15 +201,16 @@ namespace Tournament.Domain.Migrations
                     TotalWin = table.Column<decimal>(type: "numeric", nullable: false),
                     TotalPoints = table.Column<decimal>(type: "numeric", nullable: false),
                     BestMultiplier = table.Column<decimal>(type: "numeric", nullable: false),
-                    Rank = table.Column<string>(type: "text", nullable: false),
-                    LastUpdated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    Rank = table.Column<int>(type: "integer", nullable: false),
+                    LastUpdated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    TournamentPlayerId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_LeaderboardEntries", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_LeaderboardEntries_TournamentParticipants_ParticipantId",
-                        column: x => x.ParticipantId,
+                        name: "FK_LeaderboardEntries_TournamentParticipants_TournamentPlayerId",
+                        column: x => x.TournamentPlayerId,
                         principalTable: "TournamentParticipants",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -224,15 +223,14 @@ namespace Tournament.Domain.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_LeaderboardEntries_ParticipantId",
+                name: "IX_LeaderboardEntries_TournamentId",
                 table: "LeaderboardEntries",
-                column: "ParticipantId");
+                column: "TournamentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_LeaderboardEntries_TournamentId_AccountId",
+                name: "IX_LeaderboardEntries_TournamentPlayerId",
                 table: "LeaderboardEntries",
-                columns: new[] { "TournamentId", "AccountId" },
-                unique: true);
+                column: "TournamentPlayerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TournamentEvents_TournamentId",
@@ -252,12 +250,13 @@ namespace Tournament.Domain.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_TournamentParticipationRules_TournamentId",
                 table: "TournamentParticipationRules",
-                column: "TournamentId");
+                column: "TournamentId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_TournamentPoints_EventId",
+                name: "IX_TournamentPoints_EventId1",
                 table: "TournamentPoints",
-                column: "EventId");
+                column: "EventId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TournamentPoints_TournamentId",

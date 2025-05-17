@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,8 +14,7 @@ namespace Tournament.Business.Mapper
         /// <summary>
         /// Mappe the value with the registered types
         /// </summary>
-        /// <param name="configuration"></param>
-        public AutoMapper(IConfiguration configuration)
+        public AutoMapper()
         {
             CreateMap<TournamentEntity, TournamentDto>()
                 .ForMember(dest => dest.ParticipationRule, opt => opt.MapFrom(src => src.ParticipationRules));
@@ -31,6 +29,7 @@ namespace Tournament.Business.Mapper
                 .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(_ => false));
 
             CreateMap<TournamentParticipationRuleDto, TournamentParticipationRule>();
+            CreateMap<ParticipationDto, TournamentParticipant>();
 
             CreateMap<UpdateTournamentDto, TournamentEntity>()
                 .ForMember(dest => dest.ParticipationRules, opt => opt.Ignore()) // handled manually

@@ -1,4 +1,6 @@
-﻿using Tournament.Common.Enums;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Runtime.InteropServices;
+using Tournament.Common.Enums;
 
 namespace Tournament.Domain.DataBase.Entity;
 

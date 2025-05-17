@@ -42,9 +42,8 @@ namespace Tournament.Domain.Migrations
                     b.Property<long>("ParticipantId")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("Rank")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("Rank")
+                        .HasColumnType("integer");
 
                     b.Property<decimal>("TotalPoints")
                         .HasColumnType("numeric");
@@ -58,12 +57,14 @@ namespace Tournament.Domain.Migrations
                     b.Property<long>("TournamentId")
                         .HasColumnType("bigint");
 
+                    b.Property<long>("TournamentPlayerId")
+                        .HasColumnType("bigint");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("ParticipantId");
+                    b.HasIndex("TournamentId");
 
-                    b.HasIndex("TournamentId", "AccountId")
-                        .IsUnique();
+                    b.HasIndex("TournamentPlayerId");
 
                     b.ToTable("LeaderboardEntries");
                 });
@@ -85,8 +86,7 @@ namespace Tournament.Domain.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("timestamp with time zone");
@@ -95,19 +95,14 @@ namespace Tournament.Domain.Migrations
                         .HasColumnType("integer");
 
                     b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(true);
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false);
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone");
@@ -131,34 +126,26 @@ namespace Tournament.Domain.Migrations
                     b.Property<long>("AccountId")
                         .HasColumnType("bigint");
 
-                    b.Property<int>("ActionType")
+                    b.Property<int>("Action")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("DateAdded")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("EntityType")
-                        .HasColumnType("integer");
+                    b.Property<long>("EntityRefId")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid>("EventRefId")
                         .HasColumnType("uuid");
-
-                    b.Property<bool>("IsQualifying")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false);
 
                     b.Property<string>("MetaData")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<decimal?>("Odd")
-                        .HasColumnType("numeric");
-
                     b.Property<DateTime?>("ProcessedOn")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<decimal>("StakeAmount")
+                    b.Property<decimal>("SourceValue")
                         .HasColumnType("numeric");
 
                     b.Property<long>("TournamentId")
@@ -216,8 +203,7 @@ namespace Tournament.Domain.Migrations
 
                     b.Property<string>("GameCode")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("text");
 
                     b.Property<decimal>("MinBetAmount")
                         .HasColumnType("numeric");
@@ -236,7 +222,8 @@ namespace Tournament.Domain.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TournamentId");
+                    b.HasIndex("TournamentId")
+                        .IsUnique();
 
                     b.ToTable("TournamentParticipationRules");
                 });
@@ -255,26 +242,24 @@ namespace Tournament.Domain.Migrations
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<long>("EventId")
-                        .HasColumnType("bigint");
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uuid");
 
-                    b.Property<decimal>("Multiplier")
-                        .HasColumnType("numeric");
+                    b.Property<long>("EventId1")
+                        .HasColumnType("bigint");
 
                     b.Property<decimal>("Points")
                         .HasColumnType("numeric");
 
-                    b.Property<string>("Reason")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
                     b.Property<long>("TournamentId")
                         .HasColumnType("bigint");
 
+                    b.Property<decimal>("WinAmount")
+                        .HasColumnType("numeric");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("EventId");
+                    b.HasIndex("EventId1");
 
                     b.HasIndex("TournamentId");
 
@@ -325,8 +310,7 @@ namespace Tournament.Domain.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("character varying(300)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
@@ -343,8 +327,7 @@ namespace Tournament.Domain.Migrations
 
                     b.Property<string>("UniqueName")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -353,15 +336,15 @@ namespace Tournament.Domain.Migrations
 
             modelBuilder.Entity("Tournament.Domain.DataBase.Entity.LeaderboardEntry", b =>
                 {
-                    b.HasOne("Tournament.Domain.DataBase.Entity.TournamentParticipant", "TournamentPlayer")
-                        .WithMany()
-                        .HasForeignKey("ParticipantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Tournament.Domain.DataBase.Entity.TournamentEntity", "Tournament")
                         .WithMany("LeaderboardEntries")
                         .HasForeignKey("TournamentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Tournament.Domain.DataBase.Entity.TournamentParticipant", "TournamentPlayer")
+                        .WithMany()
+                        .HasForeignKey("TournamentPlayerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -403,8 +386,8 @@ namespace Tournament.Domain.Migrations
             modelBuilder.Entity("Tournament.Domain.DataBase.Entity.TournamentParticipationRule", b =>
                 {
                     b.HasOne("Tournament.Domain.DataBase.Entity.TournamentEntity", "Tournament")
-                        .WithMany("ParticipationRules")
-                        .HasForeignKey("TournamentId")
+                        .WithOne("ParticipationRules")
+                        .HasForeignKey("Tournament.Domain.DataBase.Entity.TournamentParticipationRule", "TournamentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -415,7 +398,7 @@ namespace Tournament.Domain.Migrations
                 {
                     b.HasOne("Tournament.Domain.DataBase.Entity.TournamentEvent", "Event")
                         .WithMany("Points")
-                        .HasForeignKey("EventId")
+                        .HasForeignKey("EventId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -449,7 +432,8 @@ namespace Tournament.Domain.Migrations
 
                     b.Navigation("Participants");
 
-                    b.Navigation("ParticipationRules");
+                    b.Navigation("ParticipationRules")
+                        .IsRequired();
 
                     b.Navigation("Points");
 

@@ -1,3 +1,4 @@
+using Tournament.Common.DTOs;
 using Tournament.Domain.DataBase.Entity;
 
 namespace Tournament.Data.IRepository
@@ -8,5 +9,8 @@ namespace Tournament.Data.IRepository
         Task<TournamentEntity> GetTournamentWithRulesByIdAsync(long id);
         Task UpdateAsync(TournamentEntity entity);
         Task<TournamentEntity> GetByIdAsync(long id);
+        Task<User> GetUserByIdAsync(long id);
+        Task<TournamentParticipant> GetParticipantByIdAsync(long id, long TournamentId);
+        Task AddParticipant(TournamentParticipant entity);
     }
 }

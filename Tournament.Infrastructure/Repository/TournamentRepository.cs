@@ -36,7 +36,24 @@ namespace Tournament.Data.Repository
 
         public async Task<TournamentEntity> GetByIdAsync(long id)
         {
-            return await _context.Tournaments.FirstOrDefaultAsync(t => t.Id == id);
+            return await _context.Tournaments.Include(_ => _.Participants).FirstOrDefaultAsync(t => t.Id == id);
+        }
+
+        public async Task AddParticipant(TournamentParticipant entity)
+        {
+            _context.TournamentParticipants.Add(entity);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<User> GetUserByIdAsync(long id)
+        {
+           return await _context.User.FirstOrDefaultAsync(u => u.Id == id);
+
+        }
+
+        public async Task<TournamentParticipant> GetParticipantByIdAsync(long id, long tournamentId)
+        {
+           return await _context.TournamentParticipants.FirstOrDefaultAsync( p => p.AccountId == id && p.TournamentId == tournamentId);
         }
 
     }

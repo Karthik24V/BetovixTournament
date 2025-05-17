@@ -7,6 +7,8 @@ namespace Tournament.Business.IServices
         Task<TournamentDto> CreateTournamentAsync(CreateTournamentDto dto);
         Task<TournamentDto> GetTournamentByIdAsync(long id);
         Task<TournamentDto> UpdateTournamentAsync(long id, UpdateTournamentDto dto);
+        Task<bool> JoinTournamentAsync(ParticipationDto dto);
+        Task<ParticipationStatusDto> ParticipantStatustAsync(long id, long TournamentId);
         Task<bool> DeleteTournamentAsync(long id); // New method for soft delete
     }
 }

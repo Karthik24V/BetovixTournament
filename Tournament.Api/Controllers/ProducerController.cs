@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Tournament.Common.Constants;
 using Tournament.Common.Dto_s;
+using Tournament.Common.Response;
 
 namespace Tournament.Api.Controllers
 {
@@ -18,10 +19,10 @@ namespace Tournament.Api.Controllers
 
         [Authorize(AuthenticationSchemes = AuthenticationSchemeConstants.ApiKey)]
         [HttpPost]
-        public ActionResult PostTournament(TournamentRequestDto name)
+        public ActionResult PostTournamentEvent(TournamentEventDto dto)
         {
-            _bus.Publish(name);
-            return Ok();
+            _bus.Publish(dto);
+            return Ok(ApiResponse<TournamentEventDto>.SuccessResponse(dto,"Event Published Successfully"));
         }
     }
 }
