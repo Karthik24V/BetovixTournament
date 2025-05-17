@@ -3,6 +3,7 @@ using Tournament.Data.IRepository;
 using Microsoft.EntityFrameworkCore;
 using System;
 using Tournament.Domain.DataBase.DBContext;
+using Tournament.Common.DTOs;
 
 namespace Tournament.Data.Repository
 {
@@ -56,5 +57,14 @@ namespace Tournament.Data.Repository
            return await _context.TournamentParticipants.FirstOrDefaultAsync( p => p.AccountId == id && p.TournamentId == tournamentId);
         }
 
+        public async Task<ICollection<TournamentPoint>> GetTournamentPointsByIdAsync(long tournamentId)
+        {
+            return await _context.TournamentPoints.Where(_ => _.TournamentId == tournamentId).ToListAsync();
+        }
+
+        public async Task<ICollection<TournamentEntity>> GetAllTournament()
+        {
+            return await _context.Tournaments.ToListAsync();
+        }
     }
 }

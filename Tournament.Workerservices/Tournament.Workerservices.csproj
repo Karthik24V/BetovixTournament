@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="14.0.0" />
     <PackageReference Include="MassTransit" Version="8.4.0" />
     <PackageReference Include="MassTransit.RabbitMQ" Version="8.4.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
@@ -17,6 +18,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Tournament.Business\Tournament.Business.csproj" />
     <ProjectReference Include="..\Tournament.Common\Tournament.Common.csproj" />
+    <ProjectReference Include="..\Tournament.Domain\Tournament.Domain.csproj" />
   </ItemGroup>
 </Project>

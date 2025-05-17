@@ -4,6 +4,7 @@ using Tournament.Data.IRepository;
 using Tournament.Domain.DataBase.Entity;
 using Tournament.Data.Repository;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 
 namespace Tournament.Business.Services
 {
@@ -79,7 +80,7 @@ namespace Tournament.Business.Services
             return true;
         }
 
-        public async Task<bool> JoinTournamentAsync(ParticipationDto dto)
+        public async Task<bool> JoinTournamentAsync(ParticipationDto dto)   
         {
             try
             {
@@ -121,7 +122,7 @@ namespace Tournament.Business.Services
                 return false;
             }
             catch (Exception ex) { 
-              return false;
+                return false;
             }
 
         }
@@ -149,5 +150,68 @@ namespace Tournament.Business.Services
             }
 
         }
+
+        public async Task<ICollection<LeaderboardDto>> GetLeaderBoardData(long tournamentId, int page, int pageSize, string sortBy)
+        {
+            var participants = await _tournamentRepository.GetTournamentPointsByIdAsync(tournamentId);
+
+            var leaderBoardData = participants
+                                 .GroupBy(p => p.AccountId)
+                                 .Select(g => new
+                                 {
+                                     AccountId = g.Key,
+                                     TotalPoints = g.Sum(x => x.Points),
+                                     BestMultiplier = g.Max(x => x.Points)
+                                 })
+                                 .OrderByDescending(x => sortBy == "multiplier" ? x.BestMultiplier : x.TotalPoints)
+                                 .Skip((page - 1) * pageSize).Take(pageSize)
+                                 .Select((x, index) => new LeaderboardDto
+                                 {
+                                     Rank = (page - 1) * pageSize + index + 1,
+                                     AccountId = x.AccountId,
+                                     TotalPoints = (int)x.TotalPoints,
+                                     BestMultiplier = x.BestMultiplier
+                                 }).ToList();
+
+            return leaderBoardData;
+         }
+
+        public async Task<ICollection<TournamentDto>> GetCurrentTournament()
+        {
+            var tournaments = await _tournamentRepository.GetAllTournament();
+
+            var Result = tournaments.AsQueryable().Where(_ => _.StartDate <=  DateTime.Now && _.EndDate >= DateTime.Now && _.IsActive &&  !_.IsDeleted)
+                               .Select(_ => new TournamentDto
+                               {
+                                   Name = _.Name,
+                                   GameType = _.GameType,
+                                   IsActive = _.IsActive,
+                                   StartDate = _.StartDate,
+                                   EndDate = _.EndDate,
+                                   CreatedBy = _.CreatedBy,
+                                   Description = _.Description,
+                                   IsDeleted = _.IsDeleted,
+                               }).ToList();
+            return Result;
+        }
+
+        public async Task<ICollection<TournamentDto>> GetUpcomingTournament()
+        {
+            var tournaments = await _tournamentRepository.GetAllTournament();
+
+            return tournaments.AsQueryable().Where(_ => _.StartDate >= DateTime.UtcNow && _.IsActive && !_.IsDeleted)
+                                .OrderByDescending(x => x.StartDate)
+                               .Select(_ => new TournamentDto
+                               {
+                                   Name = _.Name,
+                                   GameType = _.GameType,
+                                   IsActive = _.IsActive,
+                                   StartDate = _.StartDate,
+                                   EndDate = _.EndDate,
+                                   CreatedBy = _.CreatedBy,
+                                   Description = _.Description,
+                                   IsDeleted = _.IsDeleted,
+                               }).ToList();
+        }
     }
-}
+}   

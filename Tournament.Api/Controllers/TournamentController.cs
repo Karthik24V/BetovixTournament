@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Tournament.Business.IServices;
 using Tournament.Common.DTOs;
 using Tournament.Common.Response;
+using static MassTransit.ValidationResultExtensions;
 
 namespace Tournament.Api.Controllers
 {
@@ -99,5 +101,37 @@ namespace Tournament.Api.Controllers
             return Ok(ApiResponse<ParticipationStatusDto>.SuccessResponse(result, "Eligible participant"));
         }
 
+        [HttpGet("leaderboard/{tournamentId}")]
+        public async Task<IActionResult> GetLeaderboard(long tournamentId, int page = 1, int pageSize = 10, string sortBy = "points")
+        {
+              var Result = await _tournamentService.GetLeaderBoardData(tournamentId, page, pageSize, sortBy);
+
+                if (Result == null)
+                    return NotFound(ApiResponse<ICollection<LeaderboardDto>>.FailureResponse("Invalid data"));
+
+                return Ok(ApiResponse<ICollection<LeaderboardDto>>.SuccessResponse(Result, "Fetched SuccessFully"));
+        }
+
+        [HttpGet("CurrentTournament")]
+        public async Task<IActionResult> GetCurrentTournament()
+        {
+            var Result = await _tournamentService.GetCurrentTournament();
+
+            if (Result == null)
+                return NotFound(ApiResponse<ICollection<TournamentDto>>.FailureResponse("Invalid data"));
+
+            return Ok(ApiResponse<ICollection<TournamentDto>>.SuccessResponse(Result, "Fetched SuccessFully"));
+        }
+
+        [HttpGet("UpComingTournament")]
+        public async Task<IActionResult> GetUpComingTournament()
+        {
+            var Result = await _tournamentService.GetUpcomingTournament();
+
+            if (Result == null)
+                return NotFound(ApiResponse<ICollection<TournamentDto>>.FailureResponse("Invalid data"));
+
+            return Ok(ApiResponse<ICollection<TournamentDto>>.SuccessResponse(Result, "Fetched SuccessFully"));
+        }
     }
 }

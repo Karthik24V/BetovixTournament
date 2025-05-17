@@ -12,5 +12,7 @@ namespace Tournament.Data.IRepository
         Task<User> GetUserByIdAsync(long id);
         Task<TournamentParticipant> GetParticipantByIdAsync(long id, long TournamentId);
         Task AddParticipant(TournamentParticipant entity);
+        Task<ICollection<TournamentPoint>> GetTournamentPointsByIdAsync(long tournamentId);
+        Task<ICollection<TournamentEntity>> GetAllTournament();
     }
 }

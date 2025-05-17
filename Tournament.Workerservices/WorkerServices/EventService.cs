@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using Tournament.Common.Dto_s;
 using Tournament.Common.Helpers;
-using Tournament.Data.IRepository;
 using Tournament.Domain.DataBase.Entity;
 using Tournament.Workerservices.IWokerRepo;
 using Tournament.Workerservices.IWorkerServices;
@@ -73,7 +67,7 @@ namespace Tournament.Workerservices.WorkerServices
                     ProcessedOn = dto.DateSend.HasValue
                                         ? DateTime.SpecifyKind(dto.DateSend.Value, DateTimeKind.Utc)
                                         : (DateTime?)null,
-                    WinAmount = winAmount,
+                    WinAmount = winAmount,  
                     Points = metaData.points.Select(_ => new TournamentPoint
                     {
                         AccountId = dto.AccountId,
