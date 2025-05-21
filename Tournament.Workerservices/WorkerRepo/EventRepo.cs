@@ -42,7 +42,7 @@ namespace Tournament.Workerservices.WorkerRepo
         public async Task<TournamentEntity> GetByIdAsync(long id)
         {
             using var context = await _contextFactory.CreateDbContextAsync();
-            return await context.Tournaments.FirstOrDefaultAsync(t => t.Id == id);
+            return await context.Tournaments.Include(_ => _.ParticipationRules).FirstOrDefaultAsync(t => t.Id == id);
         }
 
         public async Task<TournamentParticipant> GetParticipantByIdAsync(long id)
@@ -51,10 +51,10 @@ namespace Tournament.Workerservices.WorkerRepo
             return await context.TournamentParticipants.FirstOrDefaultAsync(p => p.AccountId == id);
         }
 
-        public async Task<List<TournamentEvent>> GetTournamentEventByAccountId(string id)
+        public async Task<List<TournamentEvent>> GetTournamentEventByAccIdAndEventRefId(string id, Guid eventId, long tournamentId)
         {
             using var context = await _contextFactory.CreateDbContextAsync();
-            return await context.TournamentEvents.Where(_ => _.AccountId.ToString() == id).ToListAsync();
+            return await context.TournamentEvents.Where(_ => _.AccountId.ToString() == id && _.EventRefId == eventId && _.EntityRefId == tournamentId).ToListAsync();
         }
     }
 }

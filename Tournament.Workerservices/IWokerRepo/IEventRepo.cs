@@ -12,6 +12,6 @@ namespace Tournament.Workerservices.IWokerRepo
         Task<TournamentEntity> GetByIdAsync(long id);
         Task<TournamentParticipant> GetParticipantByIdAsync(long id);
         Task AddTournamenntEvent(TournamentEvent entity, long tournamentId);
-        Task<List<TournamentEvent>> GetTournamentEventByAccountId(string id);   
+        Task<List<TournamentEvent>> GetTournamentEventByAccIdAndEventRefId(string id, Guid eventId, long tournamentId);   
     }
 }
