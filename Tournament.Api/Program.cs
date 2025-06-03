@@ -1,5 +1,8 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.OpenApi.Models;
 using Tournament.Api.Extension;
+using Tournament.Common.DTOs;
 
 namespace Tournament.Api
 {
@@ -13,7 +16,12 @@ namespace Tournament.Api
             builder.Services.AddApplicationServices(builder.Configuration);
             // Add services to the container.
             builder.Services.AddControllers();
-            
+            builder.Services.AddFluentValidationAutoValidation();
+            builder.Services.AddScoped<IValidator<CreateTournamentDto>, CreateTournamentDtoValidator>();
+            builder.Services.AddScoped<IValidator<ParticipationDto>, ParticipationDtoValidator>();
+            builder.Services.AddScoped<IValidator<TournamentParticipationRuleDto>, TournamentParticipationRuleDtoValidator>();
+            builder.Services.AddScoped<IValidator<UpdateTournamentDto>, UpdateTournamentDtoValidator>();
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
