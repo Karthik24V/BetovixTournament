@@ -1,13 +1,12 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace Tournament.Domain.Migrations
 {
     /// <inheritdoc />
-    public partial class initial : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,17 +16,17 @@ namespace Tournament.Domain.Migrations
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    Description = table.Column<string>(type: "text", nullable: false),
-                    GameType = table.Column<int>(type: "integer", nullable: false),
-                    StartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    EndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
-                    CreatedBy = table.Column<string>(type: "text", nullable: false),
-                    CreatedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    GameType = table.Column<int>(type: "int", nullable: false),
+                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedOn = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedOn = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -39,14 +38,14 @@ namespace Tournament.Domain.Migrations
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    RealName = table.Column<string>(type: "text", nullable: false),
-                    UniqueName = table.Column<string>(type: "text", nullable: false),
-                    Email = table.Column<string>(type: "text", nullable: false),
-                    Country = table.Column<string>(type: "text", nullable: false),
-                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    RealName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UniqueName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Country = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
                     Points = table.Column<long>(type: "bigint", nullable: false),
-                    RegisteredOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    RegisteredOn = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -58,16 +57,17 @@ namespace Tournament.Domain.Migrations
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     AccountId = table.Column<long>(type: "bigint", nullable: false),
-                    EventRefId = table.Column<Guid>(type: "uuid", nullable: false),
+                    EventRefId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     EntityRefId = table.Column<long>(type: "bigint", nullable: false),
-                    Action = table.Column<int>(type: "integer", nullable: false),
-                    SourceValue = table.Column<decimal>(type: "numeric", nullable: false),
-                    WinAmount = table.Column<decimal>(type: "numeric", nullable: true),
-                    DateAdded = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    ProcessedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    MetaData = table.Column<string>(type: "text", nullable: false),
+                    Action = table.Column<int>(type: "int", nullable: false),
+                    SourceValue = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    WinAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    DateAdded = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ProcessedOn = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    MetaData = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TicketId = table.Column<long>(type: "bigint", nullable: false),
                     TournamentId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
@@ -86,13 +86,13 @@ namespace Tournament.Domain.Migrations
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     TournamentId = table.Column<long>(type: "bigint", nullable: false),
-                    MinBetAmount = table.Column<decimal>(type: "numeric", nullable: false),
-                    MinOdd = table.Column<decimal>(type: "numeric", nullable: true),
-                    MinSpinsCount = table.Column<int>(type: "integer", nullable: true),
-                    MinEvents = table.Column<int>(type: "integer", nullable: true),
-                    GameCode = table.Column<string>(type: "text", nullable: false)
+                    MinBetAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    MinOdd = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    MinSpinsCount = table.Column<int>(type: "int", nullable: true),
+                    MinEvents = table.Column<int>(type: "int", nullable: true),
+                    GameCode = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -110,12 +110,12 @@ namespace Tournament.Domain.Migrations
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     TournamentId = table.Column<long>(type: "bigint", nullable: false),
-                    RankFrom = table.Column<int>(type: "integer", nullable: false),
-                    RankTo = table.Column<int>(type: "integer", nullable: false),
-                    PrizeAmount = table.Column<decimal>(type: "numeric", nullable: false),
-                    PrizeType = table.Column<int>(type: "integer", nullable: false)
+                    RankFrom = table.Column<int>(type: "int", nullable: false),
+                    RankTo = table.Column<int>(type: "int", nullable: false),
+                    PrizeAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    PrizeType = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -133,12 +133,12 @@ namespace Tournament.Domain.Migrations
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     TournamentId = table.Column<long>(type: "bigint", nullable: false),
                     AccountId = table.Column<long>(type: "bigint", nullable: false),
                     UserId = table.Column<long>(type: "bigint", nullable: false),
-                    JoinedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    EligibilityPassed = table.Column<bool>(type: "boolean", nullable: false)
+                    JoinedOn = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EligibilityPassed = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -162,30 +162,30 @@ namespace Tournament.Domain.Migrations
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     TournamentId = table.Column<long>(type: "bigint", nullable: false),
                     AccountId = table.Column<long>(type: "bigint", nullable: false),
-                    EventId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Points = table.Column<decimal>(type: "numeric", nullable: false),
-                    WinAmount = table.Column<decimal>(type: "numeric", nullable: false),
-                    CreatedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    EventId1 = table.Column<long>(type: "bigint", nullable: false)
+                    EventRefId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    EventId = table.Column<long>(type: "bigint", nullable: false),
+                    Points = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    WinAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    CreatedOn = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_TournamentPoints", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_TournamentPoints_TournamentEvents_EventId1",
-                        column: x => x.EventId1,
+                        name: "FK_TournamentPoints_TournamentEvents_EventId",
+                        column: x => x.EventId,
                         principalTable: "TournamentEvents",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_TournamentPoints_Tournaments_TournamentId",
                         column: x => x.TournamentId,
                         principalTable: "Tournaments",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -193,16 +193,16 @@ namespace Tournament.Domain.Migrations
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     TournamentId = table.Column<long>(type: "bigint", nullable: false),
                     AccountId = table.Column<long>(type: "bigint", nullable: false),
                     ParticipantId = table.Column<long>(type: "bigint", nullable: false),
-                    TotalStake = table.Column<decimal>(type: "numeric", nullable: false),
-                    TotalWin = table.Column<decimal>(type: "numeric", nullable: false),
-                    TotalPoints = table.Column<decimal>(type: "numeric", nullable: false),
-                    BestMultiplier = table.Column<decimal>(type: "numeric", nullable: false),
-                    Rank = table.Column<int>(type: "integer", nullable: false),
-                    LastUpdated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    TotalStake = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TotalWin = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TotalPoints = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    BestMultiplier = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Rank = table.Column<int>(type: "int", nullable: false),
+                    LastUpdated = table.Column<DateTime>(type: "datetime2", nullable: false),
                     TournamentPlayerId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
@@ -219,7 +219,7 @@ namespace Tournament.Domain.Migrations
                         column: x => x.TournamentId,
                         principalTable: "Tournaments",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
@@ -254,9 +254,9 @@ namespace Tournament.Domain.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_TournamentPoints_EventId1",
+                name: "IX_TournamentPoints_EventId",
                 table: "TournamentPoints",
-                column: "EventId1");
+                column: "EventId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TournamentPoints_TournamentId",

@@ -16,7 +16,7 @@ var builder = Host.CreateApplicationBuilder(args);
 var rabbitMqConfig = builder.Configuration.GetSection("RabbitMQ");
 builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
 {
-    options.UseNpgsql(builder.Configuration.GetConnectionString("connectionString"));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("connectionString"));
 });
 builder.Services.AddScoped<IEventService,EventService>();
 builder.Services.AddScoped<IEventRepo, EventRepo>();

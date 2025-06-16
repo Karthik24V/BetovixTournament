@@ -1,10 +1,11 @@
-﻿using System;
+﻿using AutoMapper;
+using Microsoft.Extensions.Logging;
+using Moq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AutoMapper;
-using Moq;
 using Tournament.Business.IServices;
 using Tournament.Business.Services;
 using Tournament.Common.DTOs;
@@ -20,13 +21,15 @@ namespace Tournament.Api.Tests.Servicestest
         private Mock<ITournamentRepository> _repositoryMock;
         private Mock<IMapper> _mapperMock;
         private ITournamentService _tournamentService;
+        private Mock<ILogger<TournamentService>> _logger;
 
         [SetUp]
         public void SetUp()
         {
             _repositoryMock = new Mock<ITournamentRepository>();
             _mapperMock = new Mock<IMapper>();
-            _tournamentService = new TournamentService(_repositoryMock.Object, _mapperMock.Object);
+            _logger = new Mock<ILogger<TournamentService>>();
+            _tournamentService = new TournamentService(_repositoryMock.Object, _mapperMock.Object, _logger.Object);
         }
 
         [Test]
@@ -230,6 +233,46 @@ namespace Tournament.Api.Tests.Servicestest
             var result = await _tournamentService.JoinTournamentAsync(dto);
 
             Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public async Task GetRecentTournamentWinnersAsync_ReturnsMappedDtos_WhenWinnersExist()
+        {
+            // Arrange
+            var minCount = 2;
+            var winners = new List<(TournamentEntity Tournament, LeaderboardEntry Winner)>
+            {
+                (new TournamentEntity { Id = 1, Name = "T1" }, new LeaderboardEntry { AccountId = 10, BestMultiplier = 2.5m }),
+                (new TournamentEntity { Id = 2, Name = "T2" }, new LeaderboardEntry { AccountId = 20, BestMultiplier = 3.1m })
+            };
+            _repositoryMock.Setup(r => r.GetRecentTournamentWinnersAsync(minCount))
+                .ReturnsAsync(winners);
+
+            // Act
+            var result = await _tournamentService.GetRecentTournamentWinnersAsync(minCount);
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Count, Is.EqualTo(2));
+            Assert.That(result[0].TournamentId, Is.EqualTo(1));
+            Assert.That(result[0].TournamentName, Is.EqualTo("T1"));
+            Assert.That(result[0].WinnerAccountId, Is.EqualTo(10));
+            Assert.That(result[0].WinnerBestMultiplier, Is.EqualTo(2.5m));
+        }
+
+        [Test]
+        public async Task GetRecentTournamentWinnersAsync_ReturnsEmptyList_WhenNoWinners()
+        {
+            // Arrange
+            _repositoryMock.Setup(r => r.GetRecentTournamentWinnersAsync(It.IsAny<int>()))
+                .ReturnsAsync(new List<(TournamentEntity, LeaderboardEntry)>());
+
+            // Act
+            var result = await _tournamentService.GetRecentTournamentWinnersAsync(3);
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result, Is.Empty);
         }
     }
 }

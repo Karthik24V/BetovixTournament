@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Serilog;
 using System.Text;
 using Tournament.Api.Middlewares;
 using Tournament.Business.IServices;
@@ -28,7 +27,7 @@ namespace Tournament.Api.Extension
             // added the DbContext
             services.AddDbContext<ApplicationDbContext>(options =>
             {
-                options.UseNpgsql(configuration.GetConnectionString("connectionString"));
+                options.UseSqlServer(configuration.GetConnectionString("connectionString"));
             });
 
             // Add MassTransit and configure RabbitMQ

@@ -13,6 +13,8 @@ namespace Tournament.Data.IRepository
         Task<TournamentParticipant> GetParticipantByIdAsync(long id, long TournamentId);
         Task AddParticipant(TournamentParticipant entity);
         Task<ICollection<TournamentPoint>> GetTournamentPointsByIdAsync(long tournamentId);
-        Task<ICollection<TournamentEntity>> GetAllTournament();
+        Task<IQueryable<TournamentEntity>> GetAllTournament();
+        Task<IQueryable<LeaderboardEntry>> GetLeaderboardEntriesByTournamentIdAsync(long tournamentId);
+        Task<IList<(TournamentEntity Tournament, LeaderboardEntry Winner)>> GetRecentTournamentWinnersAsync(int minCount = 3);
     }
 }

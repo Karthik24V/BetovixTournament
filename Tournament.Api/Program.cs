@@ -45,7 +45,7 @@ namespace Tournament.Api
                     Type = SecuritySchemeType.ApiKey,
                     Scheme = "API-KEY"
                 });
-
+                          
                 c.AddSecurityRequirement(new OpenApiSecurityRequirement
                       {
                         {new OpenApiSecurityScheme{ Reference = new OpenApiReference 

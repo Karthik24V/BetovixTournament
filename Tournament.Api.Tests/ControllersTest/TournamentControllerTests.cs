@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Moq;
+using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Moq;
-using NUnit.Framework;
 using Tournament.Api.Controllers;
 using Tournament.Business.IServices;
 using Tournament.Common.DTOs;
@@ -17,12 +18,14 @@ namespace Tournament.Api.Tests.ControllersTest
     {
         private Mock<ITournamentService> _tournamentServiceMock;
         private TournamentController _controller;
+        private Mock<ILogger<TournamentController>> _logger; 
 
         [SetUp]
         public void Setup()
         {
             _tournamentServiceMock = new Mock<ITournamentService>();
-            _controller = new TournamentController(_tournamentServiceMock.Object);
+            _logger = new Mock<ILogger<TournamentController>>();
+            _controller = new TournamentController(_tournamentServiceMock.Object, _logger.Object);
         }
 
         private List<ValidationResult> ValidateModel(object model)
@@ -56,11 +59,11 @@ namespace Tournament.Api.Tests.ControllersTest
 
             _tournamentServiceMock.Setup(s => s.CreateTournamentAsync(createDto)).ReturnsAsync(tournamentDto);
 
-            var result = await _controller.CreateTournament(createDto);
-            var createdResult = result.Result as CreatedAtActionResult;
+            var actionResult = await _controller.CreateTournament(createDto);
+            var createdResult = actionResult.Result as CreatedAtActionResult; // Fix: Directly cast actionResult
             var response = createdResult?.Value as ApiResponse<TournamentDto>;
 
-            Assert.That(result.Result, Is.InstanceOf<CreatedAtActionResult>());
+            Assert.That(actionResult.Result, Is.InstanceOf<CreatedAtActionResult>()); // Fix: Directly check actionResult
             Assert.That(response, Is.Not.Null);
             Assert.That(response.Message, Is.EqualTo("Tournament created successfully"));
             Assert.That(response.Data.Id, Is.EqualTo(1));
@@ -108,11 +111,11 @@ namespace Tournament.Api.Tests.ControllersTest
 
             _tournamentServiceMock.Setup(s => s.UpdateTournamentAsync(1, updateDto)).ReturnsAsync(tournamentDto);
 
-            var result = await _controller.UpdateTournament(1, updateDto);
-            var okResult = result.Result as OkObjectResult;
+            var actionResult = await _controller.UpdateTournament(1, updateDto);
+            var okResult = actionResult.Result as OkObjectResult; // Fix: Directly cast actionResult
             var response = okResult?.Value as ApiResponse<TournamentDto>;
 
-            Assert.That(result.Result, Is.InstanceOf<OkObjectResult>());
+            Assert.That(actionResult.Result, Is.InstanceOf<OkObjectResult>()); // Fix: Directly check actionResult
             Assert.That(response, Is.Not.Null);
             Assert.That(response.Data.Name, Is.EqualTo("Updated Tournament"));
         }
@@ -155,11 +158,11 @@ namespace Tournament.Api.Tests.ControllersTest
             var dto = new TournamentDto { Id = 1, Name = "Tournament" };
             _tournamentServiceMock.Setup(s => s.GetTournamentByIdAsync(1)).ReturnsAsync(dto);
 
-            var result = await _controller.GetTournamentById(1);
-            var okResult = result.Result as OkObjectResult;
+            var actionResult = await _controller.GetTournamentById(1);
+            var okResult = actionResult.Result as OkObjectResult; // Fix: Access the Result property
             var response = okResult?.Value as ApiResponse<TournamentDto>;
 
-            Assert.That(result.Result, Is.InstanceOf<OkObjectResult>());
+            Assert.That(actionResult.Result, Is.InstanceOf<OkObjectResult>()); // Fix: Check Result property
             Assert.That(response.Data.Id, Is.EqualTo(1));
         }
 
@@ -222,22 +225,30 @@ namespace Tournament.Api.Tests.ControllersTest
         [Test]
         public async Task GetLeaderboard_ValidData()
         {
-            var leaderboard = new List<LeaderboardDto> { new LeaderboardDto { TotalPoints = 100 } };
-            _tournamentServiceMock.Setup(s => s.GetLeaderBoardData(1, 1, 10, "points")).ReturnsAsync(leaderboard);
+            var leaderboard = new PagedResult<LeaderboardDto>
+            {
+                Items = new List<LeaderboardDto> { new LeaderboardDto { TotalPoints = 100 } },
+                TotalCount = 1,
+                Page = 1,
+                PageSize = 10
+            };
+            _tournamentServiceMock.Setup(s => s.GetLeaderBoardData(1, 1, 10, "points"))
+                .ReturnsAsync(leaderboard);
 
             var result = await _controller.GetLeaderboard(1);
             var okResult = result as OkObjectResult;
-            var response = okResult?.Value as ApiResponse<ICollection<LeaderboardDto>>;
+            var response = okResult?.Value as ApiResponse<PagedResult<LeaderboardDto>>;
 
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
-            Assert.That(response.Data.Count, Is.EqualTo(1));
+            Assert.That(response.Data.Items.Count, Is.EqualTo(1));
         }
 
         [Test]
         public async Task GetLeaderboard_InvalidTournamentId_ReturnsNotFound()
         {
             // Arrange
-            _tournamentServiceMock.Setup(s => s.GetLeaderBoardData(0, 1, 10, "points")).ReturnsAsync((ICollection<LeaderboardDto>)null);
+            _tournamentServiceMock.Setup(s => s.GetLeaderBoardData(0, 1, 10, "points"))
+                .ReturnsAsync((PagedResult<LeaderboardDto>)null);
 
             // Act
             var result = await _controller.GetLeaderboard(0);
@@ -301,6 +312,46 @@ namespace Tournament.Api.Tests.ControllersTest
 
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
             Assert.That(response.Data, Is.Empty);
+        }
+
+        [Test]
+        public async Task GetRecentTournamentWinners_ReturnsOk_WhenWinnersExist()
+        {
+            // Arrange
+            var winners = new List<TournamentWinnerDto>
+            {
+                new TournamentWinnerDto { TournamentId = 1, TournamentName = "T1", WinnerAccountId = 100, WinnerBestMultiplier = 2.5m }
+            };
+            _tournamentServiceMock.Setup(s => s.GetRecentTournamentWinnersAsync(3)).ReturnsAsync(winners);
+
+            // Act
+            var result = await _controller.GetRecentTournamentWinners();
+
+            // Assert
+            var okResult = result.Result as OkObjectResult;
+            Assert.That(okResult, Is.Not.Null);
+            var response = okResult.Value as ApiResponse<IList<TournamentWinnerDto>>;
+            Assert.That(response, Is.Not.Null);
+            Assert.That(response.Success, Is.True);
+            Assert.That(response.Data, Is.EqualTo(winners));
+        }
+
+        [Test]
+        public async Task GetRecentTournamentWinners_ReturnsNotFound_WhenNoWinners()
+        {
+            // Arrange
+            _tournamentServiceMock.Setup(s => s.GetRecentTournamentWinnersAsync(3)).ReturnsAsync(new List<TournamentWinnerDto>());
+
+            // Act
+            var result = await _controller.GetRecentTournamentWinners();
+
+            // Assert
+            var notFoundResult = result.Result as NotFoundObjectResult;
+            Assert.That(notFoundResult, Is.Not.Null);
+            var response = notFoundResult.Value as ApiResponse<IList<TournamentWinnerDto>>;
+            Assert.That(response, Is.Not.Null);
+            Assert.That(response.Success, Is.False);
+            Assert.That(response.Data, Is.Null);
         }
     }
 }

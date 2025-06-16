@@ -8,6 +8,7 @@ namespace Tournament.Common.Dto_s
 {
     public class BetSpinMetadata
     {
+        public long ticketId { get; set; }
         public StakeInfo stakes { get; set; }
         public List<PointDetail> points { get; set; }
         public bool acceptChanges { get; set; }
@@ -44,5 +45,6 @@ namespace Tournament.Common.Dto_s
         public long CategoryId { get; set; }
         public long SportId { get; set; }
         public object BB { get; set; }
+        public string Result { get; set; }
     }
 }

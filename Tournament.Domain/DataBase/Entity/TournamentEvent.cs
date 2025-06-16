@@ -16,6 +16,7 @@ public class TournamentEvent
     public DateTime DateAdded { get; set; }
     public DateTime? ProcessedOn { get; set; }
     public string MetaData { get; set; }
+    public long TicketId { get; set; }
     public TournamentEntity Tournament { get; set; }
     public ICollection<TournamentPoint>? Points { get; set; }
 }

@@ -17,5 +17,27 @@ public class ApplicationDbContext : DbContext
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
     }
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<TournamentPoint>()
+            .HasOne(tp => tp.Tournament)
+            .WithMany(t => t.Points)
+            .HasForeignKey(tp => tp.TournamentId)
+            .OnDelete(DeleteBehavior.Restrict); // Prevents cascade
+
+        modelBuilder.Entity<TournamentPoint>()
+            .HasOne(tp => tp.Event)
+            .WithMany(te => te.Points)
+            .HasForeignKey(tp => tp.EventId)
+            .OnDelete(DeleteBehavior.Restrict); // Also prevent cascade
+
+        modelBuilder.Entity<LeaderboardEntry>()
+            .HasOne(e => e.Tournament)
+            .WithMany(t => t.LeaderboardEntries)
+            .HasForeignKey(e => e.TournamentId)
+            .OnDelete(DeleteBehavior.Restrict); // ✅ Avoids multiple cascade path
+    }
 
 }
